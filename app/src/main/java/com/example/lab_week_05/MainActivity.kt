@@ -51,22 +51,29 @@ class MainActivity : AppCompatActivity() {
             override fun onFailure(call: Call<List<ImageData>>, t: Throwable) {
                 Log.e(MAIN_ACTIVITY, "Failed to get response", t)
             }
-            override fun onResponse(call: Call<List<ImageData>>, response:
-            Response<List<ImageData>>) {
-                if(response.isSuccessful){
+            override fun onResponse(call: Call<List<ImageData>>, response: Response<List<ImageData>>) {
+                if (response.isSuccessful) {
                     val image = response.body()
-                    val firstImage = image?.firstOrNull()?.imageUrl.orEmpty()
-                    if (firstImage.isNotBlank()) {
-                        imageLoader.loadImage(firstImage, imageResultView)
+                    val firstImage = image?.firstOrNull()
+                    val breedName = if (!firstImage?.breeds.isNullOrEmpty()) {
+                        firstImage?.breeds?.firstOrNull()?.name ?: "Unknown"
+                    } else {
+                        "Unknown"
+                    }
+
+                    val imageUrl = firstImage?.imageUrl.orEmpty()
+                    if (imageUrl.isNotBlank()) {
+                        imageLoader.loadImage(imageUrl, imageResultView)
                     } else {
                         Log.d(MAIN_ACTIVITY, "Missing image URL")
                     }
-                    apiResponseView.text = getString(R.string.image_placeholder,
-                        firstImage)
-                }
-                else{
-                    Log.e(MAIN_ACTIVITY, "Failed to get response\n" +
-                            response.errorBody()?.string().orEmpty()
+
+                    // Ubah teks menjadi breed, bukan lagi URL
+                    apiResponseView.text = getString(R.string.image_placeholder, breedName)
+                } else {
+                    Log.e(
+                        MAIN_ACTIVITY, "Failed to get response\n" +
+                                response.errorBody()?.string().orEmpty()
                     )
                 }
             }
